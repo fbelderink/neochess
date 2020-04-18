@@ -32,7 +32,7 @@ def generate(max_size):
             try:
                 board.push_san(raw_move.strip())
             except:
-                print(raw_move)
+                raise Exception("invalid data point")
 
             if len(history) == 8:
                 history.pop(0)
