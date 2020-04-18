@@ -28,15 +28,15 @@ def bitboard(fen_list):
 
     board_arr = np.zeros((119,8,8))
 
-    board = chess.Board(fen_list[fen_list.length-1])
+    board = chess.Board(fen_list[len(fen_list) - 1])
 
-    board_arr[:112] = _encode_hiostory(fen_list)
+    board_arr[:112] = _encode_history(fen_list)
     #turn
     board_arr[112] = 0 if board.turn == chess.WHITE else 1
     #fullmove count
     board_arr[113] = board.fullmove_number
     #castling
-    board_arr[114:118] = get_castling_positions(board)
+    board_arr[114:118] = _get_castling_positions(board)
     #halfmove count
     board_arr[118] = board.halfmove_clock
 
@@ -74,7 +74,7 @@ def _get_repetition_count(board):
 
     raise Exception("invalid repetition count")
 
-def get_castling_positions(board):
+def _get_castling_positions(board):
 
     out = np.zeros((4,8,8))
     if board.has_queenside_castling_rights(chess.WHITE):
@@ -102,5 +102,3 @@ def get_castling_positions(board):
             out[3][0][6] = 1.0
 
     return out
-
-if __name__ == "__main__":

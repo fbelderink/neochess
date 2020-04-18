@@ -91,4 +91,4 @@ class _ValueHead(nn.Module):
         X = self.fc(X)
         X = self.rect(X)
         X = self.fc_out(X)
-        return X
+        return torch.tanh(X)
