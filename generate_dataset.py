@@ -3,15 +3,20 @@ import numpy as np
 import argparse
 import random
 
-def generate(max_size):
+import convert
+
+def generate(max_size, preprocess=False ,shuffle=False):
+    dir = {"1-0": 1, "1/2-1/2": 0, "0-1": -1}
     f = open("data/raw_data.txt", "r")
     raw_data = f.read()
     f.close()
 
     raw_data = raw_data.split("\n")[5:]
-    random.shuffle(raw_data)
-    size = 0
     
+    if shuffle:
+        random.shuffle(raw_data)
+    
+    size = 0
     data = []
     labels = []
 
@@ -38,12 +43,17 @@ def generate(max_size):
                 history.pop(0)
             history.append(board.fen())
             
-            data.append(history.copy())
-            labels.append(result)
+            if preprocess:
+                data.append(convert.bitboard(history.copy()))
+                labels.append(dir[result])
+            else:
+                data.append(history.copy())
+                labels.append(result)
     
-    c = list(zip(data, labels))
-    random.shuffle(c)
-    data, labels = zip(*c)
+    if shuffle: 
+        c = list(zip(data, labels))
+        random.shuffle(c)
+        data, labels = zip(*c)
 
     return data, labels
 
@@ -80,18 +90,32 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-s', '--size', required=True, type=int)
     parser.add_argument('-p', '--path', required=True)
-    parser.add_argument('-gt', '--generate_testset', action='store_true') 
+    parser.add_argument('-gt', '--generate_testset', action='store_true')
+    parser.add_argument('-pp', '--preprocess', action='store_true')
+    parser.add_argument('-sh', '--shuffle', action='store_true')
 
     args = parser.parse_args()
     size = args.size
     path = args.path
     generate_testset = args.generate_testset
+    preprocess = args.preprocess
+    shuffle = args.shuffle
+
+    data, labels = generate(size, preprocess=preprocess, shuffle=shuffle)
     
-    data, labels = generate(size)
-    
-    write_files(data, labels, path, size)
+    if preprocess:
+        data, labels = np.array(data), np.array(labels)
+        name = "%strainset_%s.npz" % (path, format_number(size))
+        np.savez(name, data, labels)
+    else:
+        write_files(data, labels, path, size)
 
     if generate_testset:
-        data, labels = generate(size * 0.25)
-
-        write_files(data, labels, path, size, True)
+        data, labels = generate(size * 0.25, preprocess=preprocess, shuffle=shuffle)
+        
+        if preprocess:
+            data, labels = np.array(data), np.array(labels)
+            name = "%stestset_%s.npz" % (path, format_number(size))
+            np.savez(name, data, labels)
+        else:
+            write_files(data, labels, path, size, True)
