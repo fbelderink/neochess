@@ -44,7 +44,7 @@ def generate(max_size, preprocess=False ,shuffle=False):
             history.append(board.fen())
             
             if preprocess:
-                data.append(convert.bitboard(history.copy()))
+                data.append(convert.bitboard(history))
                 labels.append(dir[result])
             else:
                 data.append(history.copy())
