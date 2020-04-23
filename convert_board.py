@@ -40,8 +40,8 @@ def bitboard(fen_list):
     #halfmove count
     board_arr[118] = board.halfmove_clock
 
-    return board_arr
-    
+    return board_arr 
+
 def _encode_board(board):
     assert isinstance(board, chess.Board)
     board_arr = np.zeros((14,8,8))
