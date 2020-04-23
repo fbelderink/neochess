@@ -4,7 +4,7 @@ import argparse
 import random
 import os
 
-import convert
+import convert_board as convert
 
 def generate(raw_data, max_size, shuffle=False):
     dir = {"1-0": 1, "1/2-1/2": 0, "0-1": -1}
@@ -22,7 +22,7 @@ def generate(raw_data, max_size, shuffle=False):
         moves = list(filter(None, moves))
         board = chess.Board()
         history = []
-        for move in moves:
+        for idx, move in enumerate(moves):
             if size >= max_size:
                 break
             size += 1
@@ -30,14 +30,16 @@ def generate(raw_data, max_size, shuffle=False):
             raw_move = move.split(".")[1]
             try:
                 board.push_san(raw_move.strip())
+                fen = board.fen()
+                if idx is not len(moves) - 1:
+                    next_move = board.parse_san(moves[idx + 1].split(".")[1])
             except:
                 raise Exception("invalid data point after %d examples" % size)
 
             if len(history) == 8:
                 history.pop(0)
-            history.append(board.fen())
-            
-            yield history, result
+            history.append(fen)
+            yield history, (str(next_move), result)
 
 def format_number(num):
     suffixes = ['', 'K', 'M', 'G', 'T', 'P']
@@ -63,7 +65,7 @@ def write_files(data_gen, path, size, is_testset=False):
             else:
                 datafile.writelines("%s\n" % fen)
         
-        labelsfile.writelines("%s\n" % label)
+        labelsfile.writelines("%s\n" % "%s,%s" % (label[0], label[1]))
     
     datafile.close()
     labelsfile.close()
@@ -124,7 +126,7 @@ if __name__ == "__main__":
     if bool_shuffle:
         trainset = ("%strain_data_%s" % (path, format_number(size)), "%strain_labels_%s" % (path, format_number(size)))
         if generate_testset:
-            testset = ("%stest_data_%s" % (path, format_number(size * 0.25)), "%stest_labels_%s" % (path, format_number(size * 0.25)))
+            testset = ("%stest_data_%s" % (path, format_number(int(size * 0.25))), "%stest_labels_%s" % (path, format_number(int(size * 0.25))))
             shuffle([trainset,testset])
         else:
             shuffle([trainset])
