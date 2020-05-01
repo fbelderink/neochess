@@ -51,7 +51,7 @@ def _encode_board(board):
             piece_num = i * 8 + (7 - j) if board.turn == chess.BLACK else (7 - i) * 8 + j
             piece = board.piece_at(piece_num)
             if piece is not None:
-                board_arr[pieces[str(piece)]][i][i] = 1.0
+                board_arr[pieces[str(piece)]][i][j] = 1.0
     #adds repetition count to the last two planes
     rep_count = _get_repetition_count(board)
     if(rep_count == 1 or rep_count == 2):

@@ -106,6 +106,8 @@ class _PolicyHead(nn.Module):
         X = self.seq.forward(X)
         return X
 
+
+
 if __name__ == "__main__":
     net = Net([119, 8, 8])
     out = net(torch.ones((32, 119, 8, 8)))
