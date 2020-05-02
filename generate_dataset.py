@@ -6,7 +6,7 @@ import os
 
 import convert_board as convert
 
-def generate(raw_data, max_size, shuffle=False):
+def generate(raw_data, max_size, len_history=8, shuffle=False):
     dir = {"1-0": 1, "1/2-1/2": 0, "0-1": -1}
 
     raw_data = raw_data.split("\n")[5:]
@@ -36,7 +36,7 @@ def generate(raw_data, max_size, shuffle=False):
             except:
                 raise Exception("invalid data point after %d examples" % size)
 
-            if len(history) == 8:
+            if len(history) == len_history:
                 history.pop(0)
             history.append(fen)
             yield history, (str(next_move), result)
@@ -103,12 +103,14 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-s', '--size', required=True, type=int)
     parser.add_argument('-p', '--path', required=True)
+    parser.add_argument('-lh', '--len_history', type=int)
     parser.add_argument('-gt', '--generate_testset', action='store_true')
     parser.add_argument('-sh', '--shuffle', action='store_true')
-
+    
     args = parser.parse_args()
     size = args.size
     path = args.path
+    len_history = args.len_history
     generate_testset = args.generate_testset
     bool_shuffle = args.shuffle
     
@@ -116,11 +118,11 @@ if __name__ == "__main__":
     raw_data = f.read()
     f.close()
     
-    data_gen = generate(raw_data, size, shuffle=bool_shuffle)
+    data_gen = generate(raw_data, size, len_history=len_history, shuffle=bool_shuffle)
     write_files(data_gen, path, size)
 
     if generate_testset:
-        data_gen = generate(raw_data, size * 0.25, shuffle=bool_shuffle)
+        data_gen = generate(raw_data, size * 0.25, len_history=len_history, shuffle=bool_shuffle)
         write_files(data_gen, path, size, is_testset=True)
     
     if bool_shuffle:

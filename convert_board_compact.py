@@ -5,8 +5,11 @@ rep = {"P": 0, "N": 1, "B": 2, "R": 3, "Q": 4, "K": 5,
         "p": 6, "n": 7, "b": 8, "r": 9, "q": 10, "k": 11}
 
 #returns (16,8,8) vector
-def convert_board(board):
-    assert isinstance(board, chess.Board)
+def convert_board(boards_list):
+    assert isinstance(boards_list, list)
+    assert len(boards_list) == 1
+
+    board = chess.Board(boards_list[0])
     state = np.zeros((16, 8, 8))
     
     #pieces
